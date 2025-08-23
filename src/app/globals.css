@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* Active le variant `dark:` quand la classe .dark est sur <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Laisse Tailwind gérer les couleurs via les classes (pas de variables globales qui écrasent tout) */
+:root, body { margin: 0; padding: 0; }
