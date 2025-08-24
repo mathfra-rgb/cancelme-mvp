@@ -4,11 +4,11 @@ const nextConfig = {
     domains: ["picsum.photos"],
   },
   eslint: {
-    // ⚠️ Ignore les erreurs ESLint pendant le build (elles resteront visibles en local)
+    // ✅ N'ARRÊTE PAS le build si ESLint trouve des problèmes
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // ⚠️ Ignore les erreurs TypeScript pendant le build (utile tant qu'on peaufine les types)
+    // ✅ N'ARRÊTE PAS le build si TS trouve des erreurs (on fixera plus tard)
     ignoreBuildErrors: true,
   },
 };
