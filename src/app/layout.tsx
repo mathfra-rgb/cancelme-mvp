@@ -1,17 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Header from "./components/Header";
 import { Analytics } from "@vercel/analytics/react";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "CancelMe",
@@ -23,10 +13,32 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="fr" className="scroll-smooth">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="fr" suppressHydrationWarning>
+      <head>
+        {/* Applique le thème (dark/light) avant le rendu pour éviter le flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+(function() {
+  try {
+    var s = localStorage.getItem('cm:theme');
+    var d = s ? (s === 'dark') : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (d) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  } catch(e) {}
+})();
+`,
+          }}
+        />
+      </head>
+      <body className="antialiased">
+        {/* Header global (logo + bouton thème) */}
+        <Header />
+
+        {/* Contenu des pages */}
         {children}
-        {/* Vercel Analytics */}
+
+        {/* Analytics Vercel (optionnel si tu l'as installé) */}
         <Analytics />
       </body>
     </html>
