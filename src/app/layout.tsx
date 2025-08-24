@@ -1,7 +1,7 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "./components/Header";
-import { Analytics } from "@vercel/analytics/react";
+import Header from "@/components/Header"; // 👈 chemin corrigé
 
 export const metadata: Metadata = {
   title: "CancelMe",
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
-        {/* Applique le thème (dark/light) avant le rendu pour éviter le flash */}
+        {/* Applique le thème avant le rendu pour éviter le flash */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -31,15 +31,9 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased">
-        {/* Header global (logo + bouton thème) */}
+      <body className="antialiased bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
         <Header />
-
-        {/* Contenu des pages */}
         {children}
-
-        {/* Analytics Vercel (optionnel si tu l'as installé) */}
-        <Analytics />
       </body>
     </html>
   );
