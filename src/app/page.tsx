@@ -146,7 +146,8 @@ export default function Home() {
   /* ----------------------------- Etats généraux ----------------------------- */
   const [openPanel, setOpenPanel] = useState<PanelKey>(null);
 
-  const [rankRange, setRankRange] = useState<"day" | "week" | "month">("day");
+  // 🔥 Ajout de "all" + défaut "all"
+  const [rankRange, setRankRange] = useState<"all" | "day" | "week" | "month">("all");
 
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [tagQuery, setTagQuery] = useState("");
@@ -181,6 +182,19 @@ export default function Home() {
   function setMediaRef(id: string, el: HTMLVideoElement | HTMLIFrameElement | null) {
     mediaRefs.current[id] = el;
   }
+
+  /* --------- Charger / persister la préférence de période (rankRange) -------- */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem("cm:rankRange");
+    if (saved === "all" || saved === "day" || saved === "week" || saved === "month") {
+      setRankRange(saved);
+    }
+  }, []);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("cm:rankRange", rankRange);
+  }, [rankRange]);
 
   /* ------------------------------ Chargement feed ------------------------------ */
   useEffect(() => {
@@ -514,16 +528,24 @@ export default function Home() {
 
     if (selectedTag) arr = arr.filter((p) => (p.tags || []).includes(selectedTag));
 
-    const now = Date.now();
-    const ms = rankRange === "day" ? 24 * 3600 * 1000 : rankRange === "week" ? 7 * 24 * 3600 * 1000 : 30 * 24 * 3600 * 1000;
+    // 🔥 Période : on ne filtre par date que si ≠ "all"
+    if (rankRange !== "all") {
+      const now = Date.now();
+      const ms =
+        rankRange === "day"
+          ? 24 * 3600 * 1000
+          : rankRange === "week"
+          ? 7 * 24 * 3600 * 1000
+          : 30 * 24 * 3600 * 1000;
 
-    arr = arr.filter((p) => {
-      if (!p.created_at) return true;
-      const t = new Date(p.created_at).getTime();
-      return now - t <= ms;
-    });
+      arr = arr.filter((p) => {
+        if (!p.created_at) return true;
+        const t = new Date(p.created_at).getTime();
+        return now - t <= ms;
+      });
+    }
 
-    // Récents d’abord
+    // Récents d’abord (comme ton code d’origine)
     arr = arr.sort((a, b) => {
       const ta = a.created_at ? new Date(a.created_at).getTime() : 0;
       const tb = b.created_at ? new Date(b.created_at).getTime() : 0;
@@ -539,7 +561,6 @@ export default function Home() {
     if (idx >= 0) {
       setViewerIndex(idx);
       setViewerOpen(true);
-      // Charger commentaires pour ce post
       const p = filteredPosts[idx];
       if (p?.id) ensureCommentsLoaded(p.id);
       if (typeof document !== "undefined") document.body.style.overflow = "hidden";
@@ -652,6 +673,19 @@ export default function Home() {
             <div className="rounded-lg border border-gray-200 dark:border-gray-800 p-3 bg-white dark:bg-gray-800">
               <div className="flex flex-wrap items-center gap-3 text-sm">
                 <span className="font-medium text-gray-900 dark:text-gray-100">Période :</span>
+
+                {/* 🔥 Option Tout */}
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="rankRange"
+                    value="all"
+                    checked={rankRange === "all"}
+                    onChange={() => setRankRange("all")}
+                  />
+                  Tout
+                </label>
+
                 <label className="flex items-center gap-2">
                   <input type="radio" name="rankRange" value="day" checked={rankRange === "day"} onChange={() => setRankRange("day")} />
                   Jour
@@ -972,7 +1006,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* VIEWER plein écran (avec caption, réactions, partage, signalement, commentaires) */}
+      {/* VIEWER plein écran */}
       {viewerOpen && filteredPosts[viewerIndex] && (
         <div
           className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center overflow-y-auto"
@@ -986,7 +1020,7 @@ export default function Home() {
               ✕
             </button>
             <div className="flex gap-2">
-              <button className="px-3 py-2 rounded bg-white/10 text-white hover:bg-white/20" onClick={prevInViewer} aria-label="Précédent">
+              <button className="px-3 py-2 rounded bg白/10 text-white hover:bg-white/20" onClick={prevInViewer} aria-label="Précédent">
                 ←
               </button>
               <button className="px-3 py-2 rounded bg-white/10 text-white hover:bg-white/20" onClick={nextInViewer} aria-label="Suivant">
